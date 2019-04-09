@@ -5,9 +5,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#define   USER_SIZE   20
-#define   BUFF_SIZE   40
-#define   COMM_SIZE   40
+#define   USER_SIZE   21
+#define   BUFF_SIZE   41
+#define   COMM_SIZE   41
 #define   KNRM        "\x1B[0m"
 #define   KRED        "\x1B[31m"
 #define   KGRN        "\x1B[32m"
@@ -36,7 +36,7 @@ int main (int argc, char *argv[])
   {
     printf("Please login with your system user.\n");
     printf("user: ");
-    scanf("%s",user);
+    scanf("%20s",user);
 
     retval = pam_start("server_auth_mod", user, &conv, &pamh);
 
@@ -113,7 +113,7 @@ int main (int argc, char *argv[])
                 { 
                   memset(command, 0, COMM_SIZE);
                   printf("%srun%s> ", KBLU, KNRM);
-                  scanf("%s",command);
+                  scanf("%40s",command);
                   //-------- Desde aca ---------//
                   /*
                     tengo que reemplazar por la ejecucion de cada comando
