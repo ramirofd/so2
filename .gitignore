@@ -1,6 +1,8 @@
+.vscode/*
 socket_unix
 server_unix
 client_unix
 server_internet
 client_internet
-
+cliente
+servidor
