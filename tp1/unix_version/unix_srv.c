@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <string.h>
 
 #define   USER_SIZE   21
 #define   BUFF_SIZE   41
@@ -15,6 +16,11 @@
 
 static struct pam_conv conv = { misc_conv, NULL };
 
+int parse_command(char* command);
+int start_scanning(int* sockfd);
+int update_firmware(int* sockfd);
+int get_telemetry(int* sockfd);
+
 int main (int argc, char *argv[])
 {
   char user[USER_SIZE];
@@ -23,11 +29,11 @@ int main (int argc, char *argv[])
   int retval;
   int authenticated=0;
 
-  int stream_sockfd, servlen, stream_cli_sockfd, n, pid;
+  int stream_sockfd, servlen, stream_cli_sockfd, pid;
   socklen_t clilen;
   struct sockaddr_un cli_addr, serv_addr;
 
-  char buffer[BUFF_SIZE];
+  //char buffer[BUFF_SIZE];
   char command[COMM_SIZE];
 
   const char *sun_path = "socket_unix";
@@ -64,7 +70,7 @@ int main (int argc, char *argv[])
         exit(1);
       }  
   }
-
+  fgetc(stdin);
   if (attemps==3 && authenticated==0)
     exit(1);
   else
@@ -113,26 +119,26 @@ int main (int argc, char *argv[])
                 { 
                   memset(command, 0, COMM_SIZE);
                   printf("%srun%s> ", KBLU, KNRM);
-                  scanf("%40s",command);
-                  //-------- Desde aca ---------//
-                  /*
-                    tengo que reemplazar por la ejecucion de cada comando
-                  */
-                  memset(buffer, 0, BUFF_SIZE);
-                  n = read(stream_cli_sockfd, buffer, BUFF_SIZE);
-                  if(n < 0){
-                    perror("socket read");
-                    exit(1);
+                  fgets(command,COMM_SIZE,stdin);
+                  
+                  //despues borrar lo de abajo
+                  switch(parse_command(command)){
+                    case 1:
+                      update_firmware(&stream_cli_sockfd);
+                      break;
+                    case 2:
+                      get_telemetry(&stream_cli_sockfd);
+                      break;
+                    case 3:
+                      start_scanning(&stream_cli_sockfd);
+                      break;
+                    case -1:
+                      printf("Use one of the following commands:\n");
+                      printf("  update_firmware /path/to/firmware\n");
+                      printf("  start_scanning\n");
+                      printf("  get_telemetry\n");
+                      break;
                   }
-
-                  printf( "Recibí: %s", buffer );
-
-                  n = write(stream_cli_sockfd, command, COMM_SIZE );
-                  if ( n < 0 ) {
-                    perror( "socket write" );
-                    exit( 1 );
-                  }
-                  //------- Hasta aca ---------///
                 }
             }
           else
@@ -142,5 +148,47 @@ int main (int argc, char *argv[])
         }
     }
   
+  return 0;
+}
+
+int parse_command(char* command)
+{
+  char* comm = strtok(command, " \n");
+
+  if(!strcmp(comm, "update_firmware"))
+    {
+      char* arg = strtok(NULL, "\n");
+      if(arg==NULL)
+        {
+          printf("Usage: update_firmware /path/to/firmware\n");
+          return -2;
+        }
+      return 1;
+    }
+
+  if(!strcmp(comm, "get_telemetry"))
+    return 2;
+  
+  if(!strcmp(comm, "start_scanning"))
+    return 3;
+
+  return -1;
+}
+// Implementar funcionalidad de cada metodo.
+int start_scanning(int* sockfd)
+{
+  printf("scanning process...\n");
+  return 0;
+}
+
+int update_firmware(int* sockfd)
+{
+  printf("update process...\n");
+  return 0;
+}
+
+int get_telemetry(int* sockfd)
+{
+  printf("telemetry process...\n");
   return 0;
 }
