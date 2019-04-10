@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define   USER_SIZE   21
-#define   BUFF_SIZE   41
+#define   BUFF_SIZE   1461
 #define   COMM_SIZE   41
 #define   KNRM        "\x1B[0m"
 #define   KRED        "\x1B[31m"
@@ -77,7 +77,7 @@ int main (int argc, char *argv[])
     {
       if ((stream_sockfd = socket( AF_UNIX, SOCK_STREAM, 0)) < 0) 
         {
-          perror( "create");
+          perror("create");
           exit(1);
         }
 
@@ -178,17 +178,20 @@ int parse_command(char* command)
 int start_scanning(int* sockfd)
 {
   printf("scanning process...\n");
+  write(*sockfd, "scanning", 8);
   return 0;
 }
 
 int update_firmware(int* sockfd)
 {
   printf("update process...\n");
+  write(*sockfd, "update", 6);
   return 0;
 }
 
 int get_telemetry(int* sockfd)
 {
   printf("telemetry process...\n");
+  write(*sockfd, "telemetry", 9);
   return 0;
 }
