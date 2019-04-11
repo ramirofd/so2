@@ -184,8 +184,55 @@ int start_scanning(int* sockfd)
 
 int update_firmware(int* sockfd)
 {
-  printf("update process...\n");
-  write(*sockfd, "update", 6);
+  int n, i=0;
+  char buffer[BUFF_SIZE];
+  char ok[3];
+
+  printf("*** Update ***\n");
+  // envio comando a cliente
+  n = write(*sockfd, "update", 6);
+  if (n < 0) 
+  {
+    perror( "escritura en socket" );
+    exit( 1 );
+  }
+  // leo respuesta
+  memset( ok, '\0', 3 );
+  n = read(*sockfd, ok, 3);
+  if (n < 0) 
+  {
+    perror("lectura de socket");
+    exit(1);
+  }
+  //checkeo que lo recibio correctamente
+  if(!strcmp(ok,"ok")){
+    printf("Starting update...\n");
+
+    FILE *file;
+    file = fopen("client_unix", "rb");
+
+    // IMPRIMIR LOS VALORES DE N EN CLIENTE Y SERVIDOR PARA VER SI SE MANDA BIEN EL ARCHIVO!!!
+    memset(buffer,'\0',BUFF_SIZE);
+    n=fread(buffer,1,BUFF_SIZE-1,file);
+    i+=n;
+    while(n>=(BUFF_SIZE-1))
+      {
+        memset(buffer,'\0',BUFF_SIZE);
+        n=fread(buffer,1,BUFF_SIZE-1,file);
+        i+=n;
+      }
+    printf("el archivo pesa: %d Bytes.\n",i);
+    char str[11];
+    memset( ok, '\0', 11);
+    sprintf(str, "%d", i);
+    n = write(*sockfd, str, 11);
+    if (n < 0) 
+    {
+      perror( "escritura en socket" );
+      exit( 1 );
+    }
+  }
+
   return 0;
 }
 

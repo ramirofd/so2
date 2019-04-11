@@ -86,12 +86,35 @@ int parse_command(char* command)
 int start_scanning(int* sockfd)
 {
   printf("scanning process...\n");
+  
+    
   return 0;
 }
 
 int update_firmware(int* sockfd)
 {
-  printf("update process...\n");
+  int n;
+  int file_size;
+  // char buffer[BUFF_SIZE];
+  
+  printf("*** Update ***\n");
+  n = write(*sockfd, "ok", 2);
+  if (n < 0) 
+  {
+    perror( "escritura en socket" );
+    exit( 1 );
+  }
+
+  char str[12];
+  memset( str, '\0', 12 );
+  n = read(*sockfd, str, 12);
+  if (n < 0) 
+  {
+    perror("lectura de socket");
+    exit(1);
+  }
+  file_size = atoi(str);
+  printf("El archivo pesa: %d Bytes.\n",file_size);
   return 0;
 }
 
