@@ -5,9 +5,10 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <string.h>
+#include <time.h>
 
 #define   USER_SIZE   21
-#define   BUFF_SIZE   1461
+#define   BUFF_SIZE   1460
 #define   COMM_SIZE   41
 #define   KNRM        "\x1B[0m"
 #define   KRED        "\x1B[31m"
@@ -16,9 +17,9 @@
 
 static struct pam_conv conv = { misc_conv, NULL };
 
-int parse_command(char* command);
+int parse_command(char* command, char* arg);
 int start_scanning(int* sockfd);
-int update_firmware(int* sockfd);
+int update_firmware(int* sockfd, char* path);
 int get_telemetry(int* sockfd);
 
 int main (int argc, char *argv[])
@@ -35,6 +36,7 @@ int main (int argc, char *argv[])
 
   //char buffer[BUFF_SIZE];
   char command[COMM_SIZE];
+  char path[BUFF_SIZE];
 
   const char *sun_path = "socket_unix";
   
@@ -113,24 +115,35 @@ int main (int argc, char *argv[])
             }
           if (pid==0)
             {
+              int fin = 0, n;
               printf("Satellite connected!\n");
               close(stream_sockfd);
-              while (1)
+              while (fin==0)
                 { 
                   memset(command, 0, COMM_SIZE);
                   printf("%srun%s> ", KBLU, KNRM);
                   fgets(command,COMM_SIZE,stdin);
                   
                   //despues borrar lo de abajo
-                  switch(parse_command(command)){
+                  switch(parse_command(command, path)){
                     case 1:
-                      update_firmware(&stream_cli_sockfd);
+                      update_firmware(&stream_cli_sockfd, path);
+                      fin=1;
                       break;
                     case 2:
                       get_telemetry(&stream_cli_sockfd);
                       break;
                     case 3:
                       start_scanning(&stream_cli_sockfd);
+                      break;
+                    case 4:
+                      n = write(stream_cli_sockfd, "fin", 3);
+                      if (n < 0) 
+                        {
+                          perror( "write" );
+                          exit( 1 );
+                        }
+                      fin=1;
                       break;
                     case -1:
                       printf("Use one of the following commands:\n");
@@ -140,6 +153,9 @@ int main (int argc, char *argv[])
                       break;
                   }
                 }
+              printf("Satellite disconnected...\n");
+              printf("Waiting for satellite to connect...\n");
+              exit(0);
             }
           else
           {
@@ -151,18 +167,20 @@ int main (int argc, char *argv[])
   return 0;
 }
 
-int parse_command(char* command)
+int parse_command(char* command, char* arg)
 {
   char* comm = strtok(command, " \n");
 
   if(!strcmp(comm, "update_firmware"))
     {
-      char* arg = strtok(NULL, "\n");
-      if(arg==NULL)
+      char* argtk = strtok(NULL, "\n");
+      if(argtk==NULL)
         {
           printf("Usage: update_firmware /path/to/firmware\n");
           return -2;
         }
+      memset(arg, '\0', BUFF_SIZE);
+      strcpy(arg, argtk);
       return 1;
     }
 
@@ -172,17 +190,70 @@ int parse_command(char* command)
   if(!strcmp(comm, "start_scanning"))
     return 3;
 
+  if(!strcmp(comm, "close"))
+    return 4;
+
   return -1;
 }
+
 // Implementar funcionalidad de cada metodo.
 int start_scanning(int* sockfd)
 {
-  printf("scanning process...\n");
+  int n, i=0;
+  int file_size;
+  char buffer[BUFF_SIZE];
+  clock_t start, end;
+  double cpu_time_used;
+
   write(*sockfd, "scanning", 8);
+
+  printf("*** Scan ***\n");
+
+  char str[12];
+  memset( str, '\0', 12 );
+  n = read(*sockfd, str, 12);
+  if (n < 0) 
+  {
+    perror("lectura de socket");
+    exit(1);
+  }
+  file_size = atoi(str);
+  printf("File size: %d Bytes.\n",file_size);
+
+  FILE *file;
+  file = fopen("world_rcv.jpg", "wb+");
+
+  start = clock();  
+
+  while(i<file_size)
+    {
+      memset(buffer, '\0', BUFF_SIZE);
+      n = read(*sockfd, buffer, BUFF_SIZE-1);
+      if (n < 0) 
+        {
+          perror("read");
+          exit(1);
+        }
+      i+=n;
+      fwrite(buffer, 1, n, file);
+      n = write(*sockfd, "ok", 2);
+      if (n < 0) 
+        {
+          perror( "write" );
+          exit( 1 );
+        }
+      
+    }
+  end = clock();
+  cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
+  printf("Time taken to receive the complete scanning: %f seconds.\n", cpu_time_used);
+
+  printf("*** END ***\n");
+  fclose(file);
   return 0;
 }
 
-int update_firmware(int* sockfd)
+int update_firmware(int* sockfd, char* path)
 {
   int n, i=0;
   char buffer[BUFF_SIZE];
@@ -193,7 +264,7 @@ int update_firmware(int* sockfd)
   n = write(*sockfd, "update", 6);
   if (n < 0) 
   {
-    perror( "escritura en socket" );
+    perror( "write" );
     exit( 1 );
   }
   // leo respuesta
@@ -201,7 +272,7 @@ int update_firmware(int* sockfd)
   n = read(*sockfd, ok, 3);
   if (n < 0) 
   {
-    perror("lectura de socket");
+    perror("read");
     exit(1);
   }
   //checkeo que lo recibio correctamente
@@ -209,28 +280,54 @@ int update_firmware(int* sockfd)
     printf("Starting update...\n");
 
     FILE *file;
-    file = fopen("client_unix", "rb");
+    file = fopen(path, "rb");
 
     // IMPRIMIR LOS VALORES DE N EN CLIENTE Y SERVIDOR PARA VER SI SE MANDA BIEN EL ARCHIVO!!!
     memset(buffer,'\0',BUFF_SIZE);
-    n=fread(buffer,1,BUFF_SIZE-1,file);
+    n=fread(buffer,1,BUFF_SIZE,file);
     i+=n;
-    while(n>=(BUFF_SIZE-1))
+    while(n>=(BUFF_SIZE))
       {
         memset(buffer,'\0',BUFF_SIZE);
-        n=fread(buffer,1,BUFF_SIZE-1,file);
+        n=fread(buffer,1,BUFF_SIZE,file);
         i+=n;
       }
-    printf("el archivo pesa: %d Bytes.\n",i);
+    fclose(file);
+    file = fopen(path, "rb");
+    printf("File size: %d Bytes.\n",i);
     char str[11];
-    memset( ok, '\0', 11);
+    memset( str, '\0', 11);
     sprintf(str, "%d", i);
     n = write(*sockfd, str, 11);
     if (n < 0) 
-    {
-      perror( "escritura en socket" );
-      exit( 1 );
-    }
+      {
+        perror( "write" );
+        exit( 1 );
+      }
+    i = 0;
+    
+    while(i<atoi(str))
+      {
+        memset(buffer,'\0',BUFF_SIZE);
+        n=fread(buffer,1,BUFF_SIZE,file);
+        i+=n;
+        printf("Sent: %d\n",n);
+        n = write(*sockfd, buffer, n);
+        if (n < 0) 
+          {
+            perror( "write" );
+            exit( 1 );
+          }
+        // leo respuesta
+        memset( ok, '\0', 3 );
+        n = read(*sockfd, ok, 3);
+        if (n < 0) 
+          {
+            perror("read");
+            exit(1);
+          }
+      }
+      fclose(file);
   }
 
   return 0;
