@@ -14,6 +14,7 @@
 #define   KRED        "\x1B[31m"
 #define   KGRN        "\x1B[32m"
 #define   KBLU        "\x1B[34m"
+#define   KYEL        "\x1B[33m"
 
 static struct pam_conv conv = { misc_conv, NULL };
 
@@ -207,7 +208,7 @@ int start_scanning(int* sockfd)
 
   write(*sockfd, "scanning", 8);
 
-  printf("*** Scan ***\n");
+  printf("*** %sScan%s ***\n", KYEL, KNRM);
 
   char str[12];
   memset( str, '\0', 12 );
@@ -248,7 +249,7 @@ int start_scanning(int* sockfd)
   cpu_time_used = ((double) (end - start)) / CLOCKS_PER_SEC;
   printf("Time taken to receive the complete scanning: %f seconds.\n", cpu_time_used);
 
-  printf("*** END ***\n");
+  printf("*** %sEND%s ***\n", KYEL, KNRM);
   fclose(file);
   return 0;
 }
@@ -259,83 +260,150 @@ int update_firmware(int* sockfd, char* path)
   char buffer[BUFF_SIZE];
   char ok[3];
 
-  printf("*** Update ***\n");
+  printf("*** %sUpdate%s ***\n", KYEL, KNRM);
   // envio comando a cliente
   n = write(*sockfd, "update", 6);
   if (n < 0) 
-  {
-    perror( "write" );
-    exit( 1 );
-  }
+    {
+      perror( "write" );
+      return -1;
+    }
   // leo respuesta
   memset( ok, '\0', 3 );
   n = read(*sockfd, ok, 3);
   if (n < 0) 
-  {
-    perror("read");
-    exit(1);
-  }
+    {
+      perror("read");
+      return -1;
+    }
   //checkeo que lo recibio correctamente
-  if(!strcmp(ok,"ok")){
-    printf("Starting update...\n");
+  if(!strcmp(ok,"ok"))
+    {
+      printf("Starting update...\n");
 
-    FILE *file;
-    file = fopen(path, "rb");
+      FILE *file;
+      file = fopen(path, "rb");
 
-    // IMPRIMIR LOS VALORES DE N EN CLIENTE Y SERVIDOR PARA VER SI SE MANDA BIEN EL ARCHIVO!!!
-    memset(buffer,'\0',BUFF_SIZE);
-    n=fread(buffer,1,BUFF_SIZE,file);
-    i+=n;
-    while(n>=(BUFF_SIZE))
-      {
-        memset(buffer,'\0',BUFF_SIZE);
-        n=fread(buffer,1,BUFF_SIZE,file);
-        i+=n;
-      }
-    fclose(file);
-    file = fopen(path, "rb");
-    printf("File size: %d Bytes.\n",i);
-    char str[11];
-    memset( str, '\0', 11);
-    sprintf(str, "%d", i);
-    n = write(*sockfd, str, 11);
-    if (n < 0) 
-      {
-        perror( "write" );
-        exit( 1 );
-      }
-    i = 0;
-    
-    while(i<atoi(str))
-      {
-        memset(buffer,'\0',BUFF_SIZE);
-        n=fread(buffer,1,BUFF_SIZE,file);
-        i+=n;
-        printf("Sent: %d\n",n);
-        n = write(*sockfd, buffer, n);
-        if (n < 0) 
-          {
-            perror( "write" );
-            exit( 1 );
-          }
-        // leo respuesta
-        memset( ok, '\0', 3 );
-        n = read(*sockfd, ok, 3);
-        if (n < 0) 
-          {
-            perror("read");
-            exit(1);
-          }
-      }
+      // IMPRIMIR LOS VALORES DE N EN CLIENTE Y SERVIDOR PARA VER SI SE MANDA BIEN EL ARCHIVO!!!
+      memset(buffer,'\0',BUFF_SIZE);
+      n=fread(buffer,1,BUFF_SIZE,file);
+      i+=n;
+      while(n>=(BUFF_SIZE))
+        {
+          memset(buffer,'\0',BUFF_SIZE);
+          n=fread(buffer,1,BUFF_SIZE,file);
+          i+=n;
+        }
       fclose(file);
-  }
+
+      file = fopen(path, "rb");
+      printf("File size: %d Bytes.\n",i);
+      char str[11];
+      memset( str, '\0', 11);
+      sprintf(str, "%d", i);
+      n = write(*sockfd, str, 11);
+      if (n < 0) 
+        {
+          perror( "write" );
+          fclose(file);
+          return -1;
+        }
+      i = 0;
+      
+      while(i<atoi(str))
+        {
+          memset(buffer,'\0',BUFF_SIZE);
+          n=fread(buffer,1,BUFF_SIZE,file);
+          i+=n;
+          n = write(*sockfd, buffer, n);
+          if (n < 0) 
+            {
+              perror( "write" );
+              fclose(file);
+              return -1;
+            }
+          // leo respuesta
+          memset( ok, '\0', 3 );
+          n = read(*sockfd, ok, 3);
+          if (n < 0) 
+            {
+              perror("read");
+              fclose(file);
+              return -1;
+            }
+        }
+      fclose(file);
+    }
+  printf("*** %sEND%s ***\n", KYEL, KNRM);
 
   return 0;
 }
 
 int get_telemetry(int* sockfd)
 {
-  printf("telemetry process...\n");
-  write(*sockfd, "telemetry", 9);
+  int n, socket_server, res;
+  struct sockaddr_un struct_srv;
+  socklen_t size_dir;
+
+  char upd_path[] = "socketsc_unix";
+  char buffer[BUFF_SIZE];
+  char ok[3];
+
+  printf("*** %sTelemetry Data%s ***\n", KYEL, KNRM);
+
+  if((socket_server = socket(AF_UNIX, SOCK_DGRAM, 0)) < 0) 
+    {
+      perror("create upd" );
+      return -1;
+    }
+
+  unlink(upd_path);
+
+  memset(&struct_srv, 0, sizeof(struct_srv));
+	struct_srv.sun_family = AF_UNIX;
+	strncpy(struct_srv.sun_path, upd_path, sizeof( struct_srv.sun_path ) );
+
+	if((bind(socket_server, (struct sockaddr *)&struct_srv, SUN_LEN(&struct_srv))) < 0) 
+    {
+      perror( "bind" );
+      return -1;
+    }
+
+  size_dir = sizeof(struct_srv);
+  // Fin creacion socket udp, ahora puedo avisar a cliente
+  // que haga el suyo y envie los datos.
+  n = write(*sockfd, "telemetry", 9);
+  if (n < 0) 
+    {
+      perror( "write" );
+      return -1;
+    }
+  // leo respuesta
+  memset( ok, '\0', 3 );
+  n = read(*sockfd, ok, 3);
+  if (n < 0) 
+    {
+      perror("read");
+      return -1;
+    }
+  //recibio el comando espero recibirlos
+  res = recvfrom(socket_server, (void *)buffer, BUFF_SIZE, 0, (struct sockaddr *) &struct_srv, &size_dir);
+  if(res < 0)
+    {
+      perror( "receive" );
+      return -1;
+    }
+  char *version = strtok(buffer, ";");
+  char *memory = strtok(NULL, ";");
+  char *cpu = strtok(NULL, ";");
+  char *uptime = strtok(NULL, ";");
+  char *id = strtok(NULL, ";");
+
+  printf("The Satellite %sID%s is: \t\t%s\n", KGRN, KNRM, id);
+  printf("Satellite software %sversion%s: \t%s\n", KGRN, KNRM, version);
+  printf("Satellite %smemory%s usage: \t%s\n", KGRN, KNRM, memory);
+  printf("Satellite %sCPU%s usage: \t\t%s\n", KGRN, KNRM, cpu);
+  printf("The satellite has been %s\n", uptime);
+  close(socket_server);
   return 0;
 }

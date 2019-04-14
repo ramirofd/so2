@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#include <sys/sysinfo.h>
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
@@ -12,6 +13,10 @@
 #define   KRED        "\x1B[31m"
 #define   KGRN        "\x1B[32m"
 #define   KBLU        "\x1B[34m"
+#define   KYEL        "\x1B[33m"
+
+
+#define   VERSION     "v1.0.1"
 
 int parse_command(char* command);
 int start_scanning(int* sockfd);
@@ -93,10 +98,7 @@ int start_scanning(int* sockfd)
   char buffer[BUFF_SIZE];
   char ok[3];
 
-  printf("*** Scan ***\n");
-  // envio comando a cliente
-  
-  //checkeo que lo recibio correctamente
+  printf("*** %sScan%s ***\n", KYEL, KNRM);
 
   printf("Starting scan...\n");
 
@@ -132,7 +134,6 @@ int start_scanning(int* sockfd)
       memset(buffer,'\0',BUFF_SIZE);
       n=fread(buffer,1,BUFF_SIZE,file);
       i+=n;
-      printf("Sent: %d\n",n);
       n = write(*sockfd, buffer, n);
       if (n < 0) 
         {
@@ -148,6 +149,8 @@ int start_scanning(int* sockfd)
           exit(1);
         }
     }
+    printf("*** %sEND%s ***\n", KYEL, KNRM);
+
     fclose(file);
 
   return 0;
@@ -159,7 +162,7 @@ int update_firmware(int* sockfd)
   int file_size;
   char buffer[BUFF_SIZE];
   
-  printf("*** Update ***\n");
+  printf("*** %sUpdate%s ***\n", KYEL, KNRM);
   n = write(*sockfd, "ok", 2);
   if (n < 0) 
   {
@@ -200,7 +203,7 @@ int update_firmware(int* sockfd)
           exit( 1 );
         }
     }
-  printf("*** END ***\n");
+  printf("*** %sEND%s ***\n", KYEL, KNRM);
   fclose(file);
   system("/bin/bash ./replace.sh");
   return 0;
@@ -208,6 +211,87 @@ int update_firmware(int* sockfd)
 
 int get_telemetry(int* sockfd)
 {
-  printf("telemetry process...\n");
+  int n, socket_client, res;
+  struct sockaddr_un struct_cli;
+  FILE *command;
+
+  char upd_path[] = "socketsc_unix";
+  char buffer[BUFF_SIZE];
+  char command_buffer[BUFF_SIZE];
+
+  printf("*** %sTelemetry Data%s ***\n", KYEL, KNRM);
+  
+  n = write(*sockfd, "ok", 2);
+  if (n < 0) 
+  {
+    perror( "write" );
+    return -1;
+  }
+
+  if((socket_client = socket(AF_UNIX, SOCK_DGRAM, 0)) < 0) 
+		perror("socket" );
+
+  memset(&struct_cli, 0, sizeof(struct_cli));
+	struct_cli.sun_family = AF_UNIX;
+	strncpy(struct_cli.sun_path, upd_path, sizeof(struct_cli.sun_path));
+
+  memset(buffer, '\0', BUFF_SIZE);
+  strcat(buffer,VERSION);
+  strcat(buffer,";");
+
+  memset(command_buffer, '\0', BUFF_SIZE);
+  command = popen("free -m | grep Mem | awk '{printf(\"%2.1f\", (($2-$4)/$2)*100.0)}'", "r");
+  if (command == NULL) {
+    printf("Failed to run command\n" );
+    exit(1);
+  }
+  n = fread(command_buffer, 1, BUFF_SIZE, command);
+  pclose(command);
+  strcat(buffer,command_buffer);
+  strcat(buffer,"%;");
+
+  memset(command_buffer, '\0', BUFF_SIZE);
+  command = popen("ps -A -o pcpu | tail -n+2 | paste -sd+ | bc", "r");
+  if (command == NULL) {
+    printf("Failed to run command\n" );
+    exit(1);
+  }
+  n = fread(command_buffer, 1, BUFF_SIZE, command);
+  pclose(command);
+  command_buffer[n-1]='\0';
+  strcat(buffer,command_buffer);
+  strcat(buffer,"%;");
+
+  memset(command_buffer, '\0', BUFF_SIZE);
+  command = popen("uptime -p", "r");
+  if (command == NULL) {
+    printf("Failed to run command\n" );
+    exit(1);
+  }
+  n = fread(command_buffer, 1, BUFF_SIZE, command);
+  pclose(command);
+  command_buffer[n-1]='\0';
+  strcat(buffer,command_buffer);
+  strcat(buffer,";");
+
+  memset(command_buffer, '\0', BUFF_SIZE);
+  command = popen("hostname", "r");
+  if (command == NULL) {
+    printf("Failed to run command\n" );
+    exit(1);
+  }
+  n = fread(command_buffer, 1, BUFF_SIZE, command);
+  pclose(command);
+  command_buffer[n-1]='\0';
+  strcat(buffer,command_buffer);
+  strcat(buffer,";");
+
+  res = sendto(socket_client, buffer, BUFF_SIZE, 0, (struct sockaddr *)&struct_cli, sizeof(struct_cli));
+  if(res<0)
+    {
+      perror("send");
+      return -1;
+    }
+  close(socket_client);
   return 0;
 }
