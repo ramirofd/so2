@@ -1,4 +1,5 @@
 .vscode/*
+*/.vscode/*
 socket_unix
 server_unix
 client_unix
