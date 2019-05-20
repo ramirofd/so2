@@ -8,7 +8,7 @@ CCFLAGS= -Werror -Wall -pedantic -O3
 all: local cluster
 
 local: main.c
-	$(CC) -o ./main ./main.c $(CFLAGS)
+	$(CC) -o ./main ./main.c $(CCFLAGS)
 
 cluster: main.c
 	$(ICC) -c -I$(NETCDF_DIR)/include/ main.c $(CCFLAGS) -qopenmp -std=gnu11
