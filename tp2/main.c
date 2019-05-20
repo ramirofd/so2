@@ -112,7 +112,16 @@ int main(int argc, char *argv[])
     
     if(verbose)
         {
-            printf("Starting process with: %d threads.\n", threads);
+            printf("Number of threads: ");
+        }
+    printf("%d", threads);
+    if(verbose)
+        {
+            printf(".\n");
+        }
+    else
+        {
+            printf(",");
         }
 	t1 = time_stamp_counter();
     t2 = time_stamp_counter();
@@ -124,7 +133,7 @@ int main(int argc, char *argv[])
     if(verbose)
         printf("Filter operation cycles: ");
 
-    printf("%15lu\n", ((t3-t2)-(t2-t1)));
+    printf("%lu\n", ((t3-t2)-(t2-t1)));
 
     if(argc >= 3)
         {

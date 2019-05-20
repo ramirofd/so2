@@ -4,8 +4,13 @@ Trabajo Practicos de Sistemas Operativos 2 - UNC - FCEFyN
 Edge Filter Algorithm with OpenMP optimization.
 
 # Build and run
-* run **prepare.sh**
-* run *make*
+### Local
+* run *make local*
+* run *./main \[NUM_THREADS\] \[OPTS\]* in a terminal.
+
+### Cluster
+* run *make cluster*
+* run **(Only once)** *export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:\<path to netcdf library\>*
 * run *./main \[NUM_THREADS\] \[OPTS\]* in a terminal.
 
 #Clean
@@ -30,7 +35,6 @@ Filter operation cycles:      6472083207
 Writing output to binary file "out.bin".
 	 Note: to get an image execute to_img.py.
 Freeing input and output arrays memory.
-
 ~~~
 
 # Binary/NetCDF to image.jpg
