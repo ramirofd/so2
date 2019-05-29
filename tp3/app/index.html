@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>The HTML5 Herald</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+
+  <!-- Compiled and minified CSS -->
+  <link rel="stylesheet" href="css/materialize.min.css">
+
+  <!-- Compiled and minified JavaScript -->
+  <script src="js/materialize.min.js"></script>
+  <script src="js/apexcharts.js"></script>
+  <script src="js/charts.js"></script>
+    
+</head>
+
+<body>
+    <div class="navbar-fixed">
+        <nav class="green darken-4">
+            <div class="nav-wrapper">
+                <ul id="nav-mobile">
+                    <li><a href="#">System Info</a></li>
+                    <li><a href="#">GOES 16 Files</a></li>
+                    <li><a href="#">Linux Kernel Modules</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="card row">
+                <div class="card-content">
+                    <span class="card-title"><h3>Performance</h3></span>
+                    <div class="col s6" id="memoryChart"></div>
+                    <div class="col s6" id="cpuChart"></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-content">
+                    <span class="card-title"><h3>Date and Time, Uptime</h3></span>
+                    <h5 class="center">29/05/2019 06:35</h5>
+                    <h5 class="center">Up 20 minutes</h5>
+                    <div id="liveData"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
