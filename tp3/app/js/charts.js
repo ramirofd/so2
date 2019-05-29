@@ -122,7 +122,8 @@ document.addEventListener('DOMContentLoaded', function() {
         {
             dataDiv = document.getElementById('liveData');
             // Set current data text
-            dataDiv.innerHTML = xhr.responseText;
+            var arrResponse = JSON.parse(xhr.responseText);
+            dataDiv.innerHTML = arrResponse['memory']
             // Update the live data every 1 sec
             setTimeout(updateLiveData(), 1000);
         }
