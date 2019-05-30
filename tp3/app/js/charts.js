@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var now = new Date();
         // Date string is appended as a query with live data 
         // for not to use the cached version 
-        var url = 'http://192.168.0.71/cgi-bin/hello.cgi';
+        var url = 'http://192.168.0.71/cgi-bin/sysinfo.cgi';
         xhr = getXmlHttpRequestObject();
         xhr.onreadystatechange = evenHandler;
         // asynchronous requests
@@ -120,12 +120,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Check response is ready or not
         if(xhr.readyState == 4 && xhr.status == 200)
         {
-            dataDiv = document.getElementById('liveData');
+            uptime = document.getElementById('uptimeH');
+	    datetime = document.getElementById('datetimeH');
             // Set current data text
             var arrResponse = JSON.parse(xhr.responseText);
-            dataDiv.innerHTML = arrResponse['memory']
+	    
+    	    cpuChart.updateSeries([Math.floor(arrResponse['data']['cpu'])]);
+
+    	    memoryChart.updateSeries([Math.floor(arrResponse['data']['memory'])]);
             // Update the live data every 1 sec
+	    uptime.innerHTML = arrResponse['data']['uptime'];
+	    datetime.innerHTML = arrResponse['data']['datetime'];
             setTimeout(updateLiveData(), 1000);
+	    
         }
     }
     var memoryChart = new ApexCharts(document.querySelector("#memoryChart"), memoryChartOpt);
