@@ -13,14 +13,14 @@ int main(void)
 	size_t len = 0;
 	ssize_t read;
 	FILE * command;
-	command = popen("aws s3 ls s3://noaa-goes16/ABI-L2-CMIPF/2017/360 --recursive --no-sign-request --human-readable | grep OR_ABI-L2-CMIPF-M3C13_G16", "r");
+	command = popen("~/.local/bin/aws s3 ls s3://noaa-goes16/ABI-L2-CMIPF/2017/360 --recursive --no-sign-request --human-readable | grep OR_ABI-L2-CMIPF-M3C13_G16", "r");
 	printf("{\n\t\"data\":\n\t\t{");
 	while((read = getline(&line, &len, command)) != -1)
 	{
 		lines++;
 	}
 	pclose(command);
-	command = popen("aws s3 ls s3://noaa-goes16/ABI-L2-CMIPF/2017/360 --recursive --no-sign-request --human-readable | grep OR_ABI-L2-CMIPF-M3C13_G16", "r");
+	command = popen("~/.local/bin/aws s3 ls s3://noaa-goes16/ABI-L2-CMIPF/2017/360 --recursive --no-sign-request --human-readable | grep OR_ABI-L2-CMIPF-M3C13_G16", "r");
 	while((read = getline(&line, &len, command)) != -1)
 	{	
 		line[strlen(line)-1] = '\0';
