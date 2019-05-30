@@ -5,38 +5,34 @@
 
 int main(void)
 {
-	printf("Content-Type: application/json \n\n");
+	printf("Content-Type: text/plain\n\n");
 	char * line = NULL;
 	char buffer[500];
-	char response[200000];
 	size_t len = 0;
 	ssize_t read;
 	FILE * command;
 	command = popen("aws s3 ls s3://noaa-goes16/ABI-L2-CMIPF/2017/360 --recursive --no-sign-request --human-readable | grep OR_ABI-L2-CMIPF-M3C13_G16", "r");
-	printf("{\n\t\"data\":[\n\t\t");
-	memset(response, '\0', 200000);
 	while((read = getline(&line, &len, command)) != -1)
-	{	
-		memset(buffer, '\0', 500);
+	{	memset(buffer, '\0', 500);
 		line[read-1] = '\0';
-		strcat(buffer, "{");
+		strcat(buffer, "<tr>\n");
 		char * text = strtok(line," ");
-		strcat(buffer, "\"date\":\"");
+		strcat(buffer, "\t<td>");
 		strcat(buffer, text);
-		strcat(buffer, "\", ");
+		strcat(buffer, "</td>\n");
 		
 		text = strtok(NULL, " ");
-		strcat(buffer, "\"time\":\"");
+		strcat(buffer, "\t<td>");
 		strcat(buffer, text);
-		strcat(buffer, "\", ");
+		strcat(buffer, "</td>\n");
 		
 		text = strtok(NULL, " ");
-		strcat(buffer, "\"weight\":\"");
+		strcat(buffer, "\t<td>");
 		strcat(buffer, text);
 		strcat(buffer, " ");
 		text = strtok(NULL, " ");
 		strcat(buffer, text);
-		strcat(buffer, "\", ");
+		strcat(buffer, "</td>\n");
 
 		text = strtok(NULL, " ");
 		text = strtok(text, "/");
@@ -44,14 +40,13 @@ int main(void)
 		text = strtok(NULL, "/");
 		text = strtok(NULL, "/");
 		text = strtok(NULL, "/");
-		strcat(buffer, "\"name\":\"");
+		strcat(buffer, "\t<td>");
 		strcat(buffer, text);
-		strcat(buffer, "\"");
+		strcat(buffer, "</td>\n");
 
-		strcat(buffer, "},\n\t\t");
-		strcat(response, buffer);
+		strcat(buffer, "</tr>\n");
+		printf("%s", buffer);
 	}
-	printf("%s", response);
-	printf("]\n}");
+	printf("END\n");
 	return 0;
 }
