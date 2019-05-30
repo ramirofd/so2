@@ -5,7 +5,7 @@
 
 int main(void)
 {
-	printf("Content-Type: text/plain\n\n");
+	printf("Content-Type: application/json \n\n");
 	char * line = NULL;
 	char * word, * word1;
 	char buffer[500];
