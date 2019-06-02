@@ -25,7 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
         var now = new Date();
         // Date string is appended as a query with live data 
         // for not to use the cached version 
-        var url = 'http://192.168.0.71/cgi-bin/goes.cgi';
+        year = document.getElementById('year');
+        day = document.getElementById('day');
+        var url = 'http://192.168.0.71/cgi-bin/goes.cgi?year='+year.value+'&day='+day.value;
         xhr = getXmlHttpRequestObject();
         xhr.onreadystatechange = evenHandler;
         // asynchronous requests
