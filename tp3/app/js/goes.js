@@ -1,6 +1,15 @@
 document.addEventListener('DOMContentLoaded', function() {
     var xhr = null;
 
+    function myFunction() {
+        var x = document.getElementById("preLoader");
+        if (x.style.display === "none") {
+          
+        } else {
+          x.style.display = "none";
+        }
+      } 
+
     getXmlHttpRequestObject = function()
     {
         if(!xhr)
@@ -23,6 +32,8 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.open("GET", url, true);
         // Send the request over the network
         xhr.send(null);
+        var x = document.getElementById("preLoader");
+        x.style.display = "block";
     };
 
     function evenHandler()
@@ -31,8 +42,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if(xhr.readyState == 4 && xhr.status == 200)
         {
             tabledata = document.getElementById('tableData');
-	    tabledata.innerHTML = xhr.responseText;
-	    
+	        tabledata.innerHTML = xhr.responseText;
+            var x = document.getElementById("preLoader");
+            x.style.display = "none";
+            var x = document.getElementById("resultCard");
+            x.style.display = "block";
         }
     }
     

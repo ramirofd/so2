@@ -31,12 +31,41 @@
     </div>
     <div class="container">
         <div class="row">
-            <div class="card col s12 row">
+            <div class="card col s12">
+                <div class="card-content row">
+                    <span class="card-title"><h4>Search GOES 16 Files</h4></span>
+                    <div class="input-field col s4">
+                        <input id="year" type="text" class="validate">
+                        <label class="active" for="year">Year</label>
+                    </div>
+                    <div class="input-field col s4">
+                        <input id="day" type="text" class="validate">
+                        <label class="active" for="year">Day (DOI)</label>
+                    </div>
+                    <button class="col s2 btn" onclick="updateLiveData()" style="position: relative; top: 15px;">Update</button>
+                    <div class="preloader-wrapper small active" id="preLoader"  style="display: none; position: absolute; right: 10px; top: 10px;">
+                        <div class="spinner-layer spinner-green-only">
+                            <div class="circle-clipper left">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="gap-patch">
+                                <div class="circle"></div>
+                            </div>
+                            <div class="circle-clipper right">
+                                <div class="circle"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card col s12 row" id="resultCard" style="display: none">
                 <div class="card-content">
+                    <span class="card-title"><h4>Results</h4></span>
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 100px">Created on: Date</th>
+                                <th style="width: 100px">Date</th>
                                 <th style="width: 100px">Time</th>
                                 <th>File size</th>
                                 <th>File name</th>
@@ -48,20 +77,6 @@
                     </table>
                 </div>
                 <div class="card-action row">
-                    <a class="col s1" onclick="updateLiveData()">Update</a>
-		    <div class="preloader-wrapper small active">
-			<div class="spinner-layer spinner-green-only">
-			    <div class="circle-clipper left">
-			        <div class="circle"></div>
-			    </div>
-			    <div class="gap-patch">
-			        <div class="circle"></div>
-			    </div>
-			    <div class="circle-clipper right">
-			        <div class="circle"></div>
-      			    </div>
-    			</div>
-  		    </div>
                 </div>
             </div>
         </div>
