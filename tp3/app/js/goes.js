@@ -25,15 +25,13 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.send(null);
     };
 
-    updateLiveData();
-
     function evenHandler()
     {
         // Check response is ready or not
         if(xhr.readyState == 4 && xhr.status == 200)
         {
             tabledata = document.getElementById('tableData');
-			tabledata.innerHTML = xhr.responseText;
+	    tabledata.innerHTML = xhr.responseText;
 	    
         }
     }
