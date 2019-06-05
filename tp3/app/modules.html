@@ -13,7 +13,7 @@
 
   <!-- Compiled and minified JavaScript -->
   <script src="js/materialize.min.js"></script>
-  <script src="js/goes.js"></script>
+  <script src="js/modules.js"></script>
     
 </head>
 
@@ -33,16 +33,20 @@
         <div class="row">
             <div class="card col s12">
                 <div class="card-content row">
-                    <span class="card-title"><h4>Search GOES 16 Files</h4></span>
-                    <div class="input-field col s4">
-                        <input id="year" type="text" class="validate">
-                        <label class="active" for="year">Year</label>
-                    </div>
-                    <div class="input-field col s4">
-                        <input id="day" type="text" class="validate">
-                        <label class="active" for="year">Day (DOI)</label>
-                    </div>
-                    <button class="col s2 btn" onclick="updateLiveData()" style="position: relative; top: 15px;">Search</button>
+                    <span class="card-title"><h4>Upload Module</h4></span>
+                    <form action="../../cgi-bin/upload.cgi" method="post" enctype="multipart/form-data">
+                        <div class="file-field input-field">
+                            <div class="btn">
+                                <span>File</span>
+                                <input type="file">
+                            </div>
+                            <div class="file-path-wrapper">
+                                <input class="file-path validate" type="text">
+                            </div>
+                        </div>
+                        <input type='button' onclick = 'this.form.submit();' value='Upload' class="btn">
+                    </form>
+                    <!-- <button class="col s2 btn" onclick="updateLiveData()" style="position: relative; top: 15px;">install</button> -->
                     <div class="preloader-wrapper small active" id="preLoader"  style="display: none; position: absolute; right: 10px; top: 10px;">
                         <div class="spinner-layer spinner-green-only">
                             <div class="circle-clipper left">
@@ -61,14 +65,13 @@
 
             <div class="card col s12 row" id="resultCard" style="display: none">
                 <div class="card-content">
-                    <span class="card-title"><h4>Results</h4></span>
+                    <span class="card-title"><h4>Current Installed Modules</h4></span>
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 100px">Date</th>
-                                <th style="width: 100px">Time</th>
-                                <th>File size</th>
-                                <th>File name</th>
+                                <th style="width: 300px">Module</th>
+                                <th style="width: 100px">Size</th>
+                                <th>Used by</th>
                             </tr>
                         </thead>
                         <tbody id="tableData">
