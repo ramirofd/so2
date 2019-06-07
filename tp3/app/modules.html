@@ -34,17 +34,17 @@
             <div class="card col s12">
                 <div class="card-content row">
                     <span class="card-title"><h4>Upload Module</h4></span>
-                    <form action="../../cgi-bin/upload.cgi" method="post" enctype="multipart/form-data">
+                    <form action="../../cgi-bin/file_upload.pl" method="post" enctype="multipart/form-data">
                         <div class="file-field input-field">
                             <div class="btn">
                                 <span>File</span>
-                                <input type="file">
+                                <input type="file" name="upfile">
                             </div>
                             <div class="file-path-wrapper">
                                 <input class="file-path validate" type="text">
                             </div>
                         </div>
-                        <input type='button' onclick = 'this.form.submit();' value='Upload' class="btn">
+                        <input type='button' name="button" onclick='this.form.submit();' value='Upload' class="btn">
                     </form>
                     <!-- <button class="col s2 btn" onclick="updateLiveData()" style="position: relative; top: 15px;">install</button> -->
                     <div class="preloader-wrapper small active" id="preLoader"  style="display: none; position: absolute; right: 10px; top: 10px;">
