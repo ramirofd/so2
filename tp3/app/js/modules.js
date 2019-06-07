@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // for not to use the cached version 
         year = document.getElementById('year');
         day = document.getElementById('day');
-        var url = 'http://192.168.0.71/cgi-bin/goes.cgi?year='+year.value+'&day='+day.value;
+        var url = 'http://192.168.0.71/cgi-bin/listmodules.cgi';
         xhr = getXmlHttpRequestObject();
         xhr.onreadystatechange = evenHandler;
         // asynchronous requests
@@ -28,13 +28,15 @@ document.addEventListener('DOMContentLoaded', function() {
         x.style.display = "block";
     };
 
+    updateLiveData();
+
     function evenHandler()
     {
         // Check response is ready or not
         if(xhr.readyState == 4 && xhr.status == 200)
         {
             tabledata = document.getElementById('tableData');
-	        tabledata.innerHTML = xhr.responseText;
+	    tabledata.innerHTML = xhr.responseText;
             var x = document.getElementById("preLoader");
             x.style.display = "none";
             var x = document.getElementById("resultCard");

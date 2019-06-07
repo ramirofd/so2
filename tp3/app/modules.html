@@ -46,7 +46,6 @@
                         </div>
                         <input type='button' name="button" onclick='this.form.submit();' value='Upload' class="btn">
                     </form>
-                    <!-- <button class="col s2 btn" onclick="updateLiveData()" style="position: relative; top: 15px;">install</button> -->
                     <div class="preloader-wrapper small active" id="preLoader"  style="display: none; position: absolute; right: 10px; top: 10px;">
                         <div class="spinner-layer spinner-green-only">
                             <div class="circle-clipper left">
@@ -63,23 +62,20 @@
                 </div>
             </div>
 
-            <div class="card col s12 row" id="resultCard" style="display: none">
+            <div class="card col s4 row" id="resultCard" style="display: none">
                 <div class="card-content">
                     <span class="card-title"><h4>Current Installed Modules</h4></span>
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 300px">Module</th>
-                                <th style="width: 100px">Size</th>
-                                <th>Used by</th>
+                                <th style="width: 75%">Module</th>
+                                <th style="width: 25%">Size</th>
                             </tr>
                         </thead>
                         <tbody id="tableData">
 
                         </tbody>
                     </table>
-                </div>
-                <div class="card-action row">
                 </div>
             </div>
         </div>
