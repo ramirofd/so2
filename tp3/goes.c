@@ -12,7 +12,6 @@ int main(void)
 	ssize_t read;
 	FILE * command;
 	char * qs = getenv("QUERY_STRING");
-	printf("%s", qs);
 	command = popen("aws s3 ls s3://noaa-goes16/ABI-L2-CMIPF/2017/360/20 --recursive --no-sign-request --human-readable | grep OR_ABI-L2-CMIPF-M3C13_G16", "r");
 	while((read = getline(&line, &len, command)) != -1)
 	{	memset(buffer, '\0', 500);
