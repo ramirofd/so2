@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
         var now = new Date();
         // Date string is appended as a query with live data 
         // for not to use the cached version 
-        var url = 'http://192.168.0.71/cgi-bin/sysinfo.cgi';
+        var url = 'http://192.168.43.235/cgi-bin/sysinfo.cgi';
         xhr = getXmlHttpRequestObject();
         xhr.onreadystatechange = evenHandler;
         // asynchronous requests

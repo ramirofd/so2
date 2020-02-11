@@ -46,6 +46,15 @@
                         </div>
                         <input type='button' name="button" onclick='this.form.submit();' value='Upload' class="btn">
                     </form>
+                    <form action="../../cgi-bin/remove_mod.pl" method="post" >
+                        <div class="file-field input-field">
+                            <div class="input-field col s4">
+                                <input id="name" type="text" class="validate" name="modname">
+                                <label class="active" for="name">Name</label>
+                            </div>
+                        </div>
+                        <input type='button' name="button" onclick='this.form.submit();' value='Remove' class="btn">
+                    </form>
                     <div class="preloader-wrapper small active" id="preLoader"  style="display: none; position: absolute; right: 10px; top: 10px;">
                         <div class="spinner-layer spinner-green-only">
                             <div class="circle-clipper left">

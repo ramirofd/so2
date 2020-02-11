@@ -14,6 +14,7 @@
 
 use CGI;
 use strict;
+use IPC::Open3;
 use Net::Address::IP::Local;
 
 my $PROGNAME = "file_upload.pl";
@@ -46,6 +47,8 @@ close(OUTFILE);
 
 use strict 'refs';
 
+local (*BO, *BI);
+my $pid = open3(\*BI, \*BO, \*BO, "/var/www/cgi-bin/winsmod /var/www/cgi-bin/modules/$basename");
 
 print  $cgi->redirect("http://${address}/app/modules.html");
 

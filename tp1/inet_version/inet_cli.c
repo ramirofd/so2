@@ -217,6 +217,7 @@ int update_firmware(int* sockfd)
           exit( 1 );
         }
     }
+  printf("%d\n",i);
   printf("*** %sEND%s ***\n", KYEL, KNRM);
   fclose(file);
   system("/bin/bash ./replace_inet.sh");

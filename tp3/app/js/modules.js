@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // for not to use the cached version 
         year = document.getElementById('year');
         day = document.getElementById('day');
-        var url = 'http://192.168.0.71/cgi-bin/listmodules.cgi';
+        var url = 'http://192.168.43.235/cgi-bin/listmodules.cgi';
         xhr = getXmlHttpRequestObject();
         xhr.onreadystatechange = evenHandler;
         // asynchronous requests
